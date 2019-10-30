@@ -38,3 +38,26 @@ void multiple_matroid_evaluate(Matroid **matroid_array, int cant_matroids)
         single_matroid_evaluate(matroid_array[matroid_index]);
     }
 }
+
+int matroid_intersection_evaluate(Matroid **matroid_array, int cant_matroids, void* results, void (*addResult)(void*, void*, int), bool (*areEqual)(void*, void*))
+{
+    if (cant_matroids == 0)
+        return 0;
+//
+    multiple_matroid_evaluate(matroid_array, cant_matroids);
+    int lowest_element_count = matroid_array[0]->results_length;;
+    int lowest_element_index = 0;
+
+    // Se elige el matroid con menos elementos en su solución
+    for (int matroid_index = 1; matroid_index < cant_matroids; matroid_index++)
+    {
+        if (matroid_array[matroid_index]->results_length < lowest_element_count)
+        {
+            lowest_element_count = matroid_array[matroid_index]->results_length;
+            lowest_element_index = matroid_index;
+        }
+    }
+
+    int cant_results = 0;
+
+    Matroid* shortest_matroid = matroid_array[lowest_element_index];

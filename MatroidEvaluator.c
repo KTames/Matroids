@@ -26,3 +26,15 @@ void single_matroid_evaluate(Matroid *matroid, ...)
     va_end(args);
     matroid->results_length = cant_results;
 }
+
+void multiple_matroid_evaluate(Matroid **matroid_array, int cant_matroids)
+{
+    if (cant_matroids == 0)
+        return;
+
+#pragma omp parallel for
+    for (int matroid_index = 0; matroid_index < cant_matroids; matroid_index++)
+    {
+        single_matroid_evaluate(matroid_array[matroid_index]);
+    }
+}

@@ -61,3 +61,38 @@ int matroid_intersection_evaluate(Matroid **matroid_array, int cant_matroids, vo
     int cant_results = 0;
 
     Matroid* shortest_matroid = matroid_array[lowest_element_index];
+
+#pragma omp parallel for shared(cant_results)
+    
+    for (int result_index = 0; result_index < lowest_element_count; result_index++) // Recorre cada resultado del matroid más pequeño
+    {
+        bool found_in_every_other = true;
+        void * target = shortest_matroid->results + shortest_matroid->item_size * result_index;
+        
+        for (int matroid_index = 0; matroid_index < cant_matroids; matroid_index++) {
+            if (matroid_index != lowest_element_index) {
+                
+                Matroid* matroid_to_evaluate = matroid_array[matroid_index];
+                bool local_found = false;
+                
+                for (int item_index = 0; item_index < matroid_to_evaluate->results_length; item_index++)
+                {
+                    if (areEqual(target, matroid_to_evaluate->results + item_index * matroid_to_evaluate->item_size)) {
+                        local_found = true;
+                        break;
+                    }
+                }
+                
+                if (!local_found) {
+                    found_in_every_other = false;
+                    break;
+                }
+            }
+        }
+        
+        if (found_in_every_other)
+            addResult(results, target, cant_results++);
+    }
+
+    return cant_results;
+}
